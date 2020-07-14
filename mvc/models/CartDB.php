@@ -44,16 +44,18 @@ class CartDB
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     }
-    public function getCartDetail($cart_ID){
+    public function getCartDetail($cart_ID)
+    {
         $sql = "SELECT   `cartdetails`.`carDetails_ID`,
+        `cartdetails`.`cart_ID`,
         `products`.`product_ID`,
          `products`.`productName`,
          `containerimage`.`imageName`,
-         count(`countDetails`) AS count,
-         sum(price) AS price,
+         sum(`countDetails`) AS count,
+         `products`.`price`,
          `discount`.`discount`,
-        max(`date`) AS date
- FROM `demo6`.`cartdetails`
+         `products`.`price`* sum(`countDetails`) AS sumPrice 
+        FROM `demo6`.`cartdetails`
         INNER JOIN `demo6`.`products`
         ON `products`.`product_ID` = `cartdetails`.`product_ID`
         INNER JOIN `demo6`.`discount`
@@ -68,15 +70,32 @@ class CartDB
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     }
-    public function getCountCart($user_ID){
+    public function getCountCart($user_ID)
+    {
         $cart_ID = $this->getCart($user_ID);
-        $sql = "SELECT COUNT(`cart_ID`) AS count
-        FROM `cartdetails`
-        where `cart_ID` = ?;";
+        $sql = "SELECT sum(`countDetails`) AS count
+        FROM `demo6`.`cartdetails`
+        WHERE `cart_ID` =  ? ;";
         $statement = $this->connect->prepare($sql);
         $statement->bindParam(1, $cart_ID[0]['cart_ID']);
         $statement->execute();
         $count = $statement->fetchALL(PDO::FETCH_ASSOC);
         return $count;
+    }
+    public function delCart($cart_ID, $product_ID = null)
+    {
+        if (empty($product_ID)) {
+            $sql = "DELETE FROM `demo6`.`cartdetails`
+                    WHERE `cart_ID` = ? ;";
+            $statement = $this->connect->prepare($sql);
+            $statement->bindParam(1, $cart_ID);
+        } else {
+            $sql = "DELETE FROM `demo6`.`cartdetails`
+                    WHERE `cart_ID` = ? and `product_ID` = ?;";
+            $statement = $this->connect->prepare($sql);
+            $statement->bindParam(1, $cart_ID);
+            $statement->bindParam(2, $product_ID);
+        }
+        return $statement->execute();
     }
 }

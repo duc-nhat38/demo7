@@ -36,13 +36,46 @@ class ProductDB
     }
     public function select($id = null)
     {
-        if (empty($condition)) {
-            $sql = "SELECT * FROM `demo6`.`products`;";
+        if (empty($id)) {
+            $sql = "SELECT `products`.`product_ID`,
+            `products`.`productName`,
+            `products`.`price`,
+            `products`.`count`,    
+            `containerimage`.`imageName`
+        FROM `demo6`.`products`
+        inner join `demo6`.`containerimage` ON `containerimage`.`image_ID` = `products`.`image_ID` 
+        ";
             $statement = $this->connect->prepare($sql);
             $statement->execute();
             $arrayProduct = $statement->fetchALL(PDO::FETCH_ASSOC);
         } else {
-            $sql = "SELECT * FROM `demo6`.`products`
+            $sql = "SELECT `products`.`product_ID`,
+            `products`.`productName`,
+            `products`.`description`,
+            `products`.`price`,
+            `products`.`count`,
+            `brand`.`brandName`,
+            `brand`.`brand_ID`,
+            `discount`.`discount`,
+             `informations`.`cpu`,
+            `informations`.`ram`,
+            `informations`.`hardDrive`,
+            `informations`.`screen`,
+            `informations`.`screenCard`,
+            `informations`.`connector`,
+            `informations`.`operatingSystem`,
+            `informations`.`design`,
+            `informations`.`size`,
+            `informations`.`yearManufacture`,
+            `containerimage`.`imageName`,
+            `typeproduct`.`typeName`,
+            `products`.`is_Hot`
+        FROM `demo6`.`products`
+        INNER JOIN  `demo6`.`discount` ON `discount`.`discount_ID` = `products`.`discount_ID`
+        INNER JOIN `demo6`.`brand` ON `brand`.`brand_ID` = `products`.`brand_ID`
+        INNER JOIN `demo6`.`informations` ON `informations`.`information_ID` = `products`.`information_ID`
+        INNER JOIN `demo6`.`containerimage` ON `containerimage`.`image_ID` = `products`.`image_ID`
+        INNER JOIN `demo6`.`typeproduct` ON `typeproduct`.`typeproduct_ID` = `products`.`typeproduct_ID`
         WHERE product_ID = ?";
             $statement = $this->connect->prepare($sql);
             $statement->bindParam(1, $id);
@@ -52,6 +85,44 @@ class ProductDB
 
         return $arrayProduct;
     }
+    public function getBrand($brandName)
+    {
+        $sql = "SELECT `brand`.`brand_ID`,
+        `brand`.`brandName`
+    FROM `demo6`.`brand`
+    WHERE `brandName` = upper(?);";
+        $statement = $this->connect->prepare($sql);
+        $statement->bindParam(1, $brandName);
+        $statement->execute();
+        $array = $statement->fetchALL(PDO::FETCH_ASSOC);
+        return $array;
+    }
+    public function getProductBrand($brand_ID)
+    {
+        $sql = "SELECT `products`.`product_ID`,
+        `products`.`productName`,
+        `products`.`price`,
+        `discount`.`discount`,
+        `informations`.`cpu`,
+        `brand`.`brandName`,
+        `containerimage`.`imageName`
+        FROM `demo6`.`products`
+        INNER JOIN `demo6`.`informations`
+        ON `products`.`information_ID` = `informations`.`information_ID` 
+        INNER JOIN `demo6`.`containerimage` 
+        ON `containerimage`.`image_ID` = `products`.`image_ID`
+        INNER JOIN `demo6`.`discount` 
+        ON `discount`.`discount_ID` = `products`.`discount_ID`
+        INNER JOIN `demo6`.`brand` 
+        ON `brand`.`brand_ID` = `products`.`brand_ID`
+        WHERE `products`.`brand_ID` = ? ";
+        $statement = $this->connect->prepare($sql);
+        $statement->bindParam(1, $brand_ID);
+        $statement->execute();
+        $productBrand = $statement->fetchALL(PDO::FETCH_ASSOC);
+        return $productBrand;
+    }
+
     public function delete($id)
     {
         if (!empty($id)) {
@@ -221,11 +292,11 @@ class ProductDB
      INNER JOIN `demo6`.`discount` 
      ON `discount`.`discount_ID` = `products`.`discount_ID`
      WHERE `brandName` LIKE ?;";
-     $statement2 = $this->connect->prepare($sql2);
-     $statement2->bindParam(1, $search);
-     $statement2->execute();
-     $array2 = $statement2->fetchALL(PDO::FETCH_ASSOC);
-     $sql3 = "SELECT 
+        $statement2 = $this->connect->prepare($sql2);
+        $statement2->bindParam(1, $search);
+        $statement2->execute();
+        $array2 = $statement2->fetchALL(PDO::FETCH_ASSOC);
+        $sql3 = "SELECT 
     
      `products`.`product_ID`,
       `products`.`productName`,
@@ -246,17 +317,36 @@ class ProductDB
       OR `screen` LIKE ?
       OR `screenCard` LIKE ?
       OR `yearManufacture` LIKE ?";
-      $statement3 = $this->connect->prepare($sql3);
-      $statement3->bindParam(1, $search);
-      $statement3->bindParam(2, $search);
-      $statement3->bindParam(3, $search);
-      $statement3->bindParam(4, $search);
-      $statement3->bindParam(5, $search);
-      $statement3->bindParam(6, $search);
-      $statement3->execute();
-      $array3 = $statement3->fetchALL(PDO::FETCH_ASSOC);
-      $result = array_merge($array1, $array2, $array3);     
-    //   die(var_dump(array_unique($result, SORT_REGULAR)));
-      return $result;
+        $statement3 = $this->connect->prepare($sql3);
+        $statement3->bindParam(1, $search);
+        $statement3->bindParam(2, $search);
+        $statement3->bindParam(3, $search);
+        $statement3->bindParam(4, $search);
+        $statement3->bindParam(5, $search);
+        $statement3->bindParam(6, $search);
+        $statement3->execute();
+        $array3 = $statement3->fetchALL(PDO::FETCH_ASSOC);
+        $result = array_merge($array1, $array2, $array3);
+
+        return array_unique($result, SORT_REGULAR);
+    }
+    public function addHot($product_ID)
+    {
+        $sql = "UPDATE `demo6`.`products` SET `is_Hot` =  `is_Hot` + 1
+        WHERE `product_ID` = ? ;";
+        $statement = $this->connect->prepare($sql);
+        $statement->bindParam(1, $product_ID);
+        return $statement->execute();
+    }
+
+    public function countProduct(){
+        $sql = "SELECT count(product_ID) AS countProduct,
+        sum(count) AS sumCount
+         FROM demo6.products ;";
+        $statement = $this->connect->prepare($sql);
+        $statement->execute();
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        // die(var_dump($result));
+        return $result;
     }
 }

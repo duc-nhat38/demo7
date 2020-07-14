@@ -7,16 +7,19 @@ require_once "models/ProductDB.php";
 class HomePage {
 
     public function home(){
-
-        $ImageDB = new ImageDB(DbConnection::make());
-        $arrayImage = $ImageDB->select(2);
-
-        $Products = new ProductDB(DbConnection::make());
-        $productNews = $Products->isNew();
-        $productHots = $Products->isHot();
-        $productSales = $Products->isSale();
-        return view("home",["arrayImage" => $arrayImage, "productNews" => $productNews,
-         "productHots"=> $productHots, "productSales"=>$productSales]);
+            $ImageDB = new ImageDB(DbConnection::make());
+            $arrayImage = $ImageDB->select(2);
+    
+            $Products = new ProductDB(DbConnection::make());
+            $productNews = $Products->isNew();
+            $productHots = $Products->isHot();
+            $productSales = $Products->isSale();
+            if(isset($_SESSION["customer"]) && $_SESSION["customer"]["is_admin"] == 1){
+                return redirect("formLogin");
+            }
+            return view("home",["arrayImage" => $arrayImage, "productNews" => $productNews,
+             "productHots"=> $productHots, "productSales"=>$productSales]);
+        
 
     }
     public function search(){
@@ -30,7 +33,7 @@ class HomePage {
         $key = "%$input%";
         $Products = new ProductDB(DbConnection::make());
         $productSearch = $Products->search($key);
-        return view("search", ["productSearch"=>$productSearch]);
+        return view("search", ["productSearch"=>$productSearch, "input" => $input]);
         }   
     }
 }

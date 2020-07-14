@@ -71,19 +71,65 @@ class CustomerDB
         $statement->bindParam(5, $customerDetail->image);
         return $statement->execute();
     }
-    public function getDetail()
+    public function getDetail($customer_ID = null)
     {
-        $sql = "SELECT `customerdetails`.`customer_ID`,
+        if ($customer_ID === null) {
+            $sql = "SELECT `customerdetails`.`customer_ID`,
         `customerdetails`.`fullName`,
         `customerdetails`.`address`,
         `customerdetails`.`email`,
         `customerdetails`.`phone`,
         `customerdetails`.`image`
-    FROM `demo6`.`customerdetails`
-    ORDER BY `customer_ID` DESC LIMIT 1";
+        FROM `demo6`.`customerdetails`
+        ORDER BY `customer_ID` DESC LIMIT 1";
+            $statement = $this->connect->prepare($sql);
+            $statement->execute();
+            $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $sql = "SELECT `customerdetails`.`customer_ID`,
+        `customerdetails`.`fullName`,
+        `customerdetails`.`address`,
+        `customerdetails`.`email`,
+        `customerdetails`.`phone`,
+        `customerdetails`.`image`
+        FROM `demo6`.`customerdetails`
+        WHERE `customer_ID` = ? ;";
+            $statement = $this->connect->prepare($sql);
+            $statement->bindParam(1, $customer_ID);
+            $statement->execute();
+            $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        }
+        return $result;
+    }
+
+    public function countUser()
+    {
+        $sql = "SELECT count(`user_ID`) AS countUser FROM `demo6`.`customers` where `is_admin` != 1;";
         $statement = $this->connect->prepare($sql);
-        $result = $statement->execute();
+        $statement->execute();
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        return $result;
+    }
+
+    public function getAllUser()
+    {
+        $sql = "SELECT `customers`.`user_ID`,
+        `customers`.`userName`,
+        `customers`.`password`,
+        `customerdetails`.`customer_ID`,
+        `customerdetails`.`fullName`,
+        `customerdetails`.`address`,
+        `customerdetails`.`email`,
+        `customerdetails`.`phone`,
+        `customerdetails`.`image`
+    FROM `demo6`.`customers`
+    INNER JOIN `demo6`.`customerdetails` ON `customerdetails`.`customer_ID` =`customers`.`customer_ID`
+    WHERE `is_admin` = 0;";
+        $statement = $this->connect->prepare($sql);
+        $statement->execute();
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+
         return $result;
     }
 }

@@ -17,12 +17,12 @@
             <form action="checkRegis" method="post">
                 <p><?= $note??"" ?></p>
                 <label for="username"></label>
-                <input type="text" id="username" name="username" class="input"  placeholder="Username : "><br>
+                <input type="text" id="username" name="username" class="input"  placeholder="Username : " required><br>
                 <p><?= $note2??"" ?></p>
                 <label for="password"></label>
-                <input type="password" id="password" name="password" class="input" placeholder="Password : " minlength="6"><br>
+                <input type="password" id="password" name="password" class="input" placeholder="Password : " minlength="6" required><br>
                 <label for="password2"></label>
-                <input type="password" id="password2" name="password2" class="input" placeholder="Retype Password : " minlength="6"><br>
+                <input type="password" id="password2" name="password2" class="input" placeholder="Retype Password : " minlength="6" required><br>
                 <input type="submit" value="Đăng ký" id="submit" class="input"><br>
                 <span>Bạn đã có tài khoản?</span><a href="/formLogin"><b>Đăng nhập</b></a>
             </form>

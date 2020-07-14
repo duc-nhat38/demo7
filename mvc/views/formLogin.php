@@ -17,10 +17,10 @@
             <form action="checkLogin" method="post">
                 <p><?= $note??"" ?></p>
                 <label for="username"></label>
-                <input type="text" id="username" name="username" class="input"  placeholder="Username : " minlength="6"><br>
+                <input type="text" id="username" name="username" class="input"  placeholder="Username : " minlength="6" required><br>
                 <p><?= $note2??"" ?></p>
                 <label for="password"></label>
-                <input type="password" id="password" name="password" class="input" placeholder="Password : " minlength="6"><br>
+                <input type="password" id="password" name="password" class="input" placeholder="Password : " minlength="6" required><br>
                 <input type="submit" value="Đăng nhập" id="submit" class="input"><br>
                 <span>Bạn chưa có tài khoản?</span><a href="/formRegis"><b>Đăng ký</b></a>
             </form>

@@ -4,9 +4,23 @@ require_once "models/Customers.php";
 require_once "models/CustomerDB.php";
 require_once "models/CustomerDetail.php";
 require_once "models/CartDB.php";
-
+require_once "models/BillDB.php";
+require_once "models/ProductDB.php";
 class LoginController
 {
+   public $cartDB;
+   public $customerDB;
+   public $BillDB;
+   public $ProductDB;
+
+   public function __construct()
+   {
+      $this->cartDB = new CartDB(DbConnection::make());
+      $this->customerDB = new CustomerDB(DbConnection::make());
+      $this->BillDB = new BilDB(DbConnection::make());
+      $this->ProductDB = new ProductDB(DbConnection::make());
+   }
+
    public function index($note = null, $note2 = null)
    {
       return view("formLogin", [
@@ -21,8 +35,6 @@ class LoginController
    }
    public function login()
    {
-      $cartDB = new CartDB(DbConnection::make());
-      $customerDB = new CustomerDB(DbConnection::make());
       if (empty($_POST['username'])) {
          $note = "*Không được bỏ trống !";
          return $this->index($note);
@@ -32,15 +44,19 @@ class LoginController
          return $this->index(null, $note);
       }
       $customer = new Customers($_POST['username'], md5($_POST['password']));
-      $result = $customerDB->getUser($customer);
-      if (count($result)) {
+      $result = $this->customerDB->getUser($customer);
 
+
+      if (count($result)) {
+         $customerDetail = $this->customerDB->getDetail($result[0]["customer_ID"]);
          $_SESSION['customer'] = $result[0];
-         if ($customerDB->isAdmin($customer)) {
-            // return $home->admin();
+         $_SESSION["customerDetail"] = $customerDetail[0];
+
+         if ($this->customerDB->isAdmin($customer)) {
+            return redirect("admin");
          }
-         $count = $cartDB->getCountCart($result[0]['user_ID']);
-         $_SESSION["countCart"] = $count;
+         $count = $this->cartDB->getCountCart($result[0]['user_ID']);
+         $_SESSION["countCart"] = $count[0]["count"];
          return redirect('');
       } else {
          $note = "*Tên đăng nhập hoặc mật khẩu sai !";
@@ -51,8 +67,6 @@ class LoginController
 
    public function registration()
    {
-      $cartDB = new CartDB(DbConnection::make());
-      $customerDB = new CustomerDB(DbConnection::make());
       if (empty($_POST['username'])) {
          $note = "*Không được bỏ trống !";
          return $this->regis($note);
@@ -68,15 +82,15 @@ class LoginController
       $userName = $_POST['username'];
       $password = md5($_POST['password']);
       $customer = new Customers($userName, $password);
-      $result = $customerDB->getUser($customer);
+      $result = $this->customerDB->getUser($customer);
 
       if (count($result) === 0) {
          $customerDetail = new CustomerDetail();
-         $customerDB->addDetail($customerDetail);
-         $detail = $customerDB->getDetail();
-         $customerDB->registration($customer, $detail[0]['customer_ID']);
-         $result = $customerDB->getUser($customer);
-         $cartDB->addCart($result[0]['user_ID']);
+         $this->customerDB->addDetail($customerDetail);
+         $detail = $this->customerDB->getDetail();
+         $this->customerDB->registration($customer, $detail[0]['customer_ID']);
+         $result = $this->customerDB->getUser($customer);
+         $this->cartDB->addCart($result[0]['user_ID']);
          $note = "Đăng kí thành công";
          return $this->login();
       } else {
@@ -90,4 +104,15 @@ class LoginController
       session_destroy();
       return  redirect('');
    }
+
+   public function personal()
+   {
+
+      $productDelivery = $this->BillDB->getProductDelivery($_SESSION["customer"]["user_ID"]);
+      $productBought = $this->BillDB->getProductBought($_SESSION["customer"]["user_ID"]);
+      return view('personal', ["productDelivery" => $productDelivery, "productBought" => $productBought]);
+   }
+
+   
+
 }

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,32 +10,32 @@
 </head>
 
 <body>
-<div class="container">
-    <div class="header">
-    <?php include "header.php" ?>
-    <div class="container_image">
+    <div class="container">
+        <div class="header">
+            <?php include "header.php" ?>
+            <div class="container_image">
                 <?php include "banner.php" ?>
             </div>
-    </div>
-    <div class="content">
-        <div class="is_Product Sale">
-        <?php include "isSale.php" ?>
         </div>
-        <hr>
-        <div class="is_Product New">
-        <?php include "isNew.php" ?>
+        <div class="content">
+            <div class="is_Product Sale">
+                <?php include "isSale2.php" ?>
+            </div>
+            <hr>
+            <div class="is_Product New">
+                <?php include "isNew2.php" ?>
+            </div>
+            <hr>
+            <div class="is_Product Hot">
+                <?php include "isHot2.php" ?>
+            </div>
+           
         </div>
-        <hr>
-        <div class="is_Product Hot">
-            <?php include "isHot.php" ?>
+        <div class="footer">
+            <?php include "footer.php" ?>
         </div>
-        
     </div>
-    <div class="footer">
-    <?php include "footer.php" ?>
-    </div>
-</div>
-<script src="public/javascript.js"></script>
+    <script src="public/javascript.js"></script>
 </body>
 
 </html>
